@@ -1,0 +1,8 @@
+module ActiveRelation
+  module Regexp
+    SEPARATOR_PRIMITIVE = '__'
+    FIELD_PRIMITIVE     = '([a-z][_a-zA-Z0-9]*)'
+    FIELD_REGEXP        = /\A#{FIELD_PRIMITIVE}\Z/
+    ASSOCIATION_REGEXP  = /\A#{SEPARATOR_PRIMITIVE}#{FIELD_PRIMITIVE}#{SEPARATOR_PRIMITIVE}#{FIELD_PRIMITIVE}\Z/
+  end
+end
