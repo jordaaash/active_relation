@@ -1,6 +1,7 @@
 require 'active_support/dependencies/autoload'
 require 'arel/null_order_predications'
 require 'active_relation/errors'
+require 'active_relation/version'
 
 module ActiveRelation
   extend ActiveSupport::Autoload
