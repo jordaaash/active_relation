@@ -1,28 +1,25 @@
-require 'active_support/dependencies/autoload'
 require 'arel/null_order_predications'
 require 'active_relation/errors'
 require 'active_relation/version'
 
 module ActiveRelation
-  extend ActiveSupport::Autoload
+  autoload :Model,               'active_relation/model'
+  autoload :Relation,            'active_relation/model'
 
-  autoload :Model
-  autoload :Relation
+  autoload :Fields,              'active_relation/model'
+  autoload :Associations,        'active_relation/model'
 
-  autoload :Fields
-  autoload :Associations
+  autoload :Query,               'active_relation/model'
+  autoload :Select,              'active_relation/model'
+  autoload :Join,                'active_relation/model'
+  autoload :Order,               'active_relation/model'
+  autoload :Limit,               'active_relation/model'
+  autoload :Where,               'active_relation/model'
+  autoload :Group,               'active_relation/model'
+  autoload :Execute,             'active_relation/model'
+  autoload :CreateUpdateDestroy, 'active_relation/model'
 
-  autoload :Query
-  autoload :Select
-  autoload :Join
-  autoload :Order
-  autoload :Limit
-  autoload :Where
-  autoload :Group
-  autoload :Execute
-  autoload :CreateUpdateDestroy
-
-  autoload :EmptyNode
-  autoload :NodeScope
-  autoload :Regexp
+  autoload :EmptyNode,           'active_relation/model'
+  autoload :NodeScope,           'active_relation/model'
+  autoload :Regexp,              'active_relation/model'
 end

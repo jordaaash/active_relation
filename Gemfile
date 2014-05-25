@@ -1,9 +1,9 @@
 source 'http://rubygems.org'
 
+gem 'ruby_utils',    '0.1.0.alpha', github: 'jordansexton/ruby_utils'
+
 gem 'activesupport', '~> 3.2.18'
 gem 'activerecord',  '~> 3.2.18'
-gem 'ruby_utils',    '0.1.0.alpha',
-    github: 'jordansexton/ruby_utils'
 
 group :development do
   gem 'shoulda',   '>= 0'
