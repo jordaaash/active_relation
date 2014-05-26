@@ -3,11 +3,10 @@ require 'active_relation/version'
 
 module ActiveRelation
   autoload :Model,               'active_relation/model'
-  autoload :Relation,            'active_relation/relation'
-
   autoload :Fields,              'active_relation/fields'
   autoload :Associations,        'active_relation/associations'
 
+  autoload :Relation,            'active_relation/relation'
   autoload :Query,               'active_relation/query'
   autoload :Select,              'active_relation/select'
   autoload :Join,                'active_relation/join'
