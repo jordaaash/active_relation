@@ -11,12 +11,10 @@ module ActiveRelation
     def field (field, options = nil, &block)
       raise ActiveRelation::FieldDefinitionInvalid unless field =~ FIELD_REGEXP
       if options.is_a?(Proc)
-        raise ActiveRelation::FieldDefinitionInvalid if block_given?
+        raise ActiveRelation::FieldDefinitionInvalid if block
         block, options = options, {}
       elsif options
-        unless options.respond_to?(:[])
-          raise ActiveRelation::FieldDefinitionInvalid
-        end
+        raise ActiveRelation::FieldDefinitionInvalid unless options.is_a?(Hash)
       else
         options = {}
       end
@@ -34,7 +32,7 @@ module ActiveRelation
       end
 
       column      ||= field
-      self[field] = if block_given?
+      self[field] = if block
                       block
                     elsif model
                       proc { model[column] }
@@ -46,7 +44,7 @@ module ActiveRelation
 
     def alias (field, as = nil, &block)
       if as.is_a?(Proc)
-        raise ActiveRelation::AliasDefinitionInvalid if block_given?
+        raise ActiveRelation::AliasDefinitionInvalid if block
         block, as = as, nil
       end
       as             ||= field

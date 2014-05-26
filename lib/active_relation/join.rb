@@ -111,7 +111,7 @@ module ActiveRelation
     def node_for_join (association, relation, associated, through = nil, &block)
       node = joins[association] || EmptyNode.new
       node = merge_constraints(relation, node)
-      if block_given?
+      if block
         node = relation.instance_exec(node, association, associated, through, &block)
       end
       raise ActiveRelation::JoinTypeInvalid unless node_valid?(node)

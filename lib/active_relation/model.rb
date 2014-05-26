@@ -104,7 +104,12 @@ module ActiveRelation
       end
 
       def cast (node, as)
-        function('CAST', [node.as(as.to_s)])
+        if node.respond_to?(:as)
+          node = node.as(as.to_s)
+        elsif node.respond_to?(:alias=)
+          node.alias = as.to_s
+        end
+        function('CAST', [node])
       end
     end
 

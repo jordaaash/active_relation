@@ -1,4 +1,5 @@
 require 'active_support/core_ext/string/inflections'
+require 'active_support/hash_with_indifferent_access'
 require 'ruby_utils/lazy_indifferent_hash'
 
 module ActiveRelation
@@ -6,7 +7,7 @@ module ActiveRelation
     include ActiveRelation::Regexp
 
     def belongs_to (association, options = {}, &block)
-      model = self.associate association, options, &block
+      model = associate association, options, &block
 
       foreign_key = options[:foreign_key] || model.foreign_key
       primary_key = options[:primary_key] || model.primary_key
@@ -21,7 +22,7 @@ module ActiveRelation
     end
 
     def has_one (association, options = {}, &block)
-      model = self.associate association, options, &block
+      model = associate association, options, &block
 
       if (through = options[:through])
         through_associations[association] = through
@@ -79,7 +80,7 @@ module ActiveRelation
       options[:model] ||= \
         "#{module_name}::#{association.to_s.singularize.camelize}"
 
-      model = self.associate association, options, &block
+      model = associate association, options, &block
       if (through = options[:through])
         through_associations[association] = through
 
@@ -118,8 +119,14 @@ module ActiveRelation
       model = model.constantize if model.respond_to?(:constantize)
       block ||= proc do
         model.aliases_for_fields.map do |a|
+          node   = a.left
           nested = nest_association(association, a.right)
-          a.left.as(nested)
+          if node.respond_to?(:as)
+            node = node.as(nested)
+          elsif node.respond_to?(:alias=)
+            node.alias = nested
+          end
+          node
         end
       end
 
@@ -138,7 +145,7 @@ module ActiveRelation
         left_node  = model[left_field]
         associated = associations[association]
         right_node = associated[right_field]
-        if block_given?
+        if block
           instance_exec(associated, model, left_node, right_node, &block)
         else
           left_node.eq(right_node)
@@ -148,7 +155,7 @@ module ActiveRelation
     end
 
     def scope_association (association, scope = nil, &block)
-      if block_given?
+      if block
         raise ActiveRelation::ScopeInvalid if scope
         scope = block
       else
@@ -165,7 +172,7 @@ module ActiveRelation
 
     def scope (name = :default, scope = nil, define = true, &block)
       raise ActiveRelation::ScopeInvalid unless name
-      if block_given?
+      if block
         raise ActiveRelation::ScopeInvalid if scope
         scope = block
       end

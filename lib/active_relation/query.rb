@@ -25,7 +25,8 @@ module ActiveRelation
         results
       else
         select(options[:fields])
-        where(primary_key, ids).first!
+        where(primary_key, ids)
+        first!
       end
     end
 
@@ -49,7 +50,7 @@ module ActiveRelation
 
     def scoped (scope = :default, *arguments, &block)
       reset if results?
-      if block_given?
+      if block
         raise ActiveRelation::ScopeInvalid if scope.is_a?(Proc)
       else
         block = scope.is_a?(Proc) ? scope : self.scope(scope)
