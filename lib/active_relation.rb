@@ -18,6 +18,5 @@ module ActiveRelation
   autoload :CreateUpdateDestroy, 'active_relation/create_update_destroy'
 
   autoload :EmptyNode,           'active_relation/empty_node'
-  autoload :NodeScope,           'active_relation/node_scope'
   autoload :Regexp,              'active_relation/regexp'
 end
