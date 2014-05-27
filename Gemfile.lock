@@ -1,8 +1,9 @@
 GIT
   remote: git://github.com/jordansexton/ruby_utils.git
-  revision: f11e5c94a1e05205b9bca1b58da91cf802b7a511
+  revision: cc9624b90335997735f66e81d1f96221505cd990
   specs:
-    ruby_utils (0.1.0.alpha)
+    ruby_utils (0.1.0)
+      activesupport (>= 3.2)
 
 GEM
   remote: http://rubygems.org/
@@ -88,6 +89,6 @@ DEPENDENCIES
   bundler (~> 1.0)
   jeweler (~> 2.0.1)
   rdoc (~> 3.12)
-  ruby_utils (= 0.1.0.alpha)!
+  ruby_utils!
   shoulda
   simplecov
