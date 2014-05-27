@@ -148,11 +148,9 @@ module ActiveRelation
         if block
           instance_exec(associated, model, left_node, right_node, &block)
         else
-          begin
-            left_node.eq(right_node)
-          rescue NoMethodError
-            raise "association: #{association}, left_field: #{left_field}, right_field: #{right_field}, model: #{model}"
-          end
+          raise JoinDefinitionInvalid if left_node.nil?
+          raise JoinDefinitionInvalid if right_node.nil?
+          left_node.eq(right_node)
         end
       end
       nil # Avoid eager evaluation of the block from using the return value

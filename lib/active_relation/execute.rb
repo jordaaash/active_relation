@@ -11,22 +11,24 @@ module ActiveRelation
     def results
       @results ||= begin
         results = cast_types(rows)
-        pk      = primary_key
-        fk      = foreign_key
-        includes.each do |i, block|
-          associated         = associations[i]
-          ids                = results.map(&pk)
-          relation           = associated.instance_exec(ids, results, &block)
-          associated_results = relation.results.reduce({}) do |h, r|
-            id = r[fk]
-            a  = h[id] ||= []
-            a << r
-            h
-          end
-          results.each do |result|
-            id        = result[pk]
-            r         = associated_results[id]
-            result[i] = r || []
+        if results.size
+          pk      = primary_key
+          fk      = foreign_key
+          includes.each do |i, block|
+            associated         = associations[i]
+            ids                = results.map(&pk)
+            relation           = associated.instance_exec(ids, results, &block)
+            associated_results = relation.results.reduce({}) do |h, r|
+              id = r[fk]
+              a  = h[id] ||= []
+              a << r
+              h
+            end
+            results.each do |result|
+              id        = result[pk]
+              r         = associated_results[id]
+              result[i] = r || []
+            end
           end
         end
         results
