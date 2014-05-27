@@ -15,16 +15,14 @@ module ActiveRelation
 
     def find (ids, options = {})
       reset if results?
+      all(options)
+      where(primary_key, ids)
       if ids.is_a?(Enumerable)
-        where(primary_key, ids)
-        results = all(options)
         # FIXME: Add found rows calculation so that this doesn't error on edge case of IDs with limit
         # https://stackoverflow.com/questions/3984643/equivalent-of-found-rows-function-in-postgresql
         raise ActiveRelation::RelationNotFound unless results.size == ids.size
         results
       else
-        select(options[:fields])
-        where(primary_key, ids)
         first!
       end
     end
