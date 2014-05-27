@@ -112,7 +112,8 @@ module ActiveRelation
       node = joins[association] || EmptyNode.new
       node = merge_constraints(relation, node)
       if block
-        node = relation.instance_exec(node, association, associated, through, &block)
+        on   = relation.instance_exec(node, association, associated, through, &block)
+        node = on.is_a?(Array) ? on.reduce(node) { |n, c| n.and(c) } : on
       end
       raise ActiveRelation::JoinTypeInvalid unless node_valid?(node)
       node

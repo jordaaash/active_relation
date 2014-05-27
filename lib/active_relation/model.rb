@@ -99,17 +99,18 @@ module ActiveRelation
         Arel.star
       end
 
-      def function (name, expression)
+      def function (name, *expression)
         Arel::Nodes::NamedFunction.new(name, expression)
       end
 
-      def cast (node, as)
+      def cast (field, as, &block)
+        node = node_for_field(field, &block)
         if node.respond_to?(:as)
           node = node.as(as.to_s)
         elsif node.respond_to?(:alias=)
           node.alias = as.to_s
         end
-        function('CAST', [node])
+        function('CAST', node)
       end
     end
 

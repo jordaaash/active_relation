@@ -11,7 +11,6 @@ module ActiveRelation
       select(options[:fields])
       order(options[:order])
       paginate(options[:limit] || 0, options[:offset] || 0)
-      results
     end
 
     def find (ids, options = {})

@@ -16,6 +16,7 @@ module ActiveRelation
   autoload :Group,               'active_relation/group'
   autoload :Execute,             'active_relation/execute'
   autoload :CreateUpdateDestroy, 'active_relation/create_update_destroy'
+  autoload :Include,             'active_relation/include'
 
   autoload :EmptyNode,           'active_relation/empty_node'
   autoload :Regexp,              'active_relation/regexp'

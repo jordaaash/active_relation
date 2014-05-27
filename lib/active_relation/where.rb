@@ -58,7 +58,7 @@ module ActiveRelation
 
     def node_for_where (field, values, comparison = :==, negate = false, &block)
       node   = node_for_field(field)
-      values = values.to_a if values.is_a?(Enumerable)
+      values = values.to_a if values.is_a?(Set) || values.is_a?(Range)
       node   = comparison_for_node(node, values, comparison, negate)
       yield_for_node(node, field, values, comparison, negate, &block)
     end

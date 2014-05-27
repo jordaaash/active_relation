@@ -9,6 +9,7 @@ module ActiveRelation
     include Group
     include Execute
     include CreateUpdateDestroy
+    include Include
 
     attr_reader :model
 
@@ -47,6 +48,6 @@ module ActiveRelation
              :node_for_field, :node_valid?, :yield_for_node,
              :cast_types, :cast_type,
              :associations, :through_associations, :joins, :scope, :nest_association,
-             :sql, :star, :function, :cast, to: :model
+             :quote, :sql, :star, :function, :cast, to: :model
   end
 end
