@@ -8,6 +8,7 @@ module ActiveRelation
 
     def all (options = {})
       reset if results?
+      scoped
       select(options[:fields])
       order(options[:order])
       paginate(options[:limit] || 0, options[:offset] || 0)

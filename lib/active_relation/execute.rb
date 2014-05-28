@@ -12,11 +12,12 @@ module ActiveRelation
       @results ||= begin
         results = cast_types(rows)
         if results.size
-          pk      = primary_key
-          fk      = foreign_key
+          pk = primary_key
+          fk = foreign_key
           includes.each do |i, block|
             associated         = associations[i]
             ids                = results.map(&pk)
+            block              ||= proc { |ids| all.distinct.where(fk, ids) }
             relation           = associated.instance_exec(ids, results, &block)
             associated_results = relation.results.reduce({}) do |h, r|
               id = r[fk]

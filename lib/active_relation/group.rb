@@ -6,7 +6,7 @@ module ActiveRelation
       self
     end
 
-    def having (fields, values = nil, comparison = :==, &block)
+    def having (fields, comparison, values = nil, &block)
       negate = not?
       @not   = nil
       nodes  = nodes_for_where(fields, values, comparison, negate, &block)
