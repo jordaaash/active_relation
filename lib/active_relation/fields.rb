@@ -99,6 +99,20 @@ module ActiveRelation
       @attributes ||= HashWithIndifferentAccess.new
     end
 
+    def attributes_for_fields (fields)
+      default   = self.fields.keys.to_set
+      available = default + associations.keys.to_set
+      fields.reduce({}) do |a, (f, v)|
+        f = f.to_s
+        raise ActiveRelation::FieldNotDefined unless available.include?(f)
+        unless (attribute = attributes[f])
+          raise ActiveRelation::AttributeNotDefined
+        end
+        a[attribute] = v
+        a
+      end
+    end
+
     def aliases_for_fields (fields = nil, &block)
       fields ||= self.fields.keys
       fields.flat_map { |f| alias_for_field(f, &block) }

@@ -1,5 +1,3 @@
-require 'arel'
-require 'arel/nodes/named_function'
 require 'active_support/hash_with_indifferent_access'
 require 'active_support/core_ext/string/inflections'
 
@@ -7,17 +5,19 @@ module ActiveRelation
   class Model
     extend Fields
     extend Associations
+    extend Functions
+    extend CreateUpdateDestroy
 
-    delegate :cast_type, :sql, :star, :function, :cast, to: :class
+    delegate :cast_type, to: :class
 
     class << self
       delegate :columns_hash, to: :active_record
 
-      delegate :all, :find, :count, :first, :first!, :scoped, :unscoped,
+      delegate :all, :find, :find_by, :count, :first, :first!, :scoped, :unscoped,
                :select, :distinct, :join,
                :where, :compare, :like, :not,
                :order, :paginate, :offset, :limit,
-               :group, :having, :to_sql, :create!, :update!, :destroy!, to: :relation
+               :group, :having, :to_sql, to: :relation
 
       def relation
         ActiveRelation::Relation.new(self)
@@ -33,10 +33,6 @@ module ActiveRelation
 
       def connection
         active_record.connection
-      end
-
-      def quote (sql)
-        connection.quote(sql)
       end
 
       def table (table = nil)
@@ -89,28 +85,6 @@ module ActiveRelation
         else
           @foreign_key ||= :"#{model_name}_#{primary_key}"
         end
-      end
-
-      def sql (sql)
-        Arel.sql(sql)
-      end
-
-      def star
-        Arel.star
-      end
-
-      def function (name, *expression)
-        Arel::Nodes::NamedFunction.new(name, expression)
-      end
-
-      def cast (field, as, &block)
-        node = node_for_field(field, &block)
-        if node.respond_to?(:as)
-          node = node.as(as.to_s)
-        elsif node.respond_to?(:alias=)
-          node.alias = as.to_s
-        end
-        function('CAST', node)
       end
     end
 

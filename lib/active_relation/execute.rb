@@ -55,6 +55,7 @@ module ActiveRelation
     def to_sql
       @sql ||= begin
         select unless select?
+        scoped unless scoped?
         query.to_sql
       end
     end

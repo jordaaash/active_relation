@@ -5,6 +5,7 @@ module ActiveRelation
   autoload :Model,               'active_relation/model'
   autoload :Fields,              'active_relation/fields'
   autoload :Associations,        'active_relation/associations'
+  autoload :Functions,           'active_relation/functions'
 
   autoload :Relation,            'active_relation/relation'
   autoload :Query,               'active_relation/query'

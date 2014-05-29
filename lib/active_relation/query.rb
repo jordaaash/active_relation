@@ -8,7 +8,7 @@ module ActiveRelation
 
     def all (options = {})
       reset if results?
-      scoped
+      scoped unless scoped?
       select(options[:fields])
       order(options[:order])
       paginate(options[:limit] || 0, options[:offset] || 0)
@@ -16,7 +16,7 @@ module ActiveRelation
 
     def find (ids, options = {})
       reset if results?
-      all(options)
+      select(options[:fields]) unless select?
       where(primary_key, ids)
       if ids.is_a?(Enumerable)
         # FIXME: Add found rows calculation so that this doesn't error on edge case of IDs with limit
@@ -28,22 +28,40 @@ module ActiveRelation
       end
     end
 
+    def find_by (fields, options = {})
+      reset if results?
+      select(options[:fields]) unless select?
+      where(fields)
+      first
+    end
+
+    def find_by! (fields, options = {})
+      find_by(fields, options) or raise ActiveRelation::RelationNotFound
+    end
+
     def count
       selected.clear if select?
       select!
-      select(table_alias[star].count)
+      select(table[star].count)
       raise ActiveRelation::RelationNotFound unless (row = rows.first)
       row.values.first.to_i
     end
 
     def first (count = 1)
       reset if results?
-      results = limit(count).results
+      limit(count)
       count == 1 ? results.first : results
     end
 
     def first! (count = 1)
-      first(count) or raise ActiveRelation::RelationNotFound
+      results = first(count)
+      if count == 1
+        results or raise ActiveRelation::RelationNotFound
+      elsif result.size == count
+        results
+      else
+        raise ActiveRelation::RelationNotFound
+      end
     end
 
     def scoped (scope = :default, *arguments, &block)
