@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Jordan Sexton"]
-  s.date = "2014-05-28"
+  s.date = "2014-05-29"
   s.description = "Arel-based ORM that abstracts ActiveRecord models for creating APIs."
   s.email = "jordan@jordansexton.com"
   s.extra_rdoc_files = [
@@ -35,6 +35,7 @@ Gem::Specification.new do |s|
     "lib/active_relation/errors.rb",
     "lib/active_relation/execute.rb",
     "lib/active_relation/fields.rb",
+    "lib/active_relation/functions.rb",
     "lib/active_relation/gem_version.rb",
     "lib/active_relation/group.rb",
     "lib/active_relation/include.rb",
