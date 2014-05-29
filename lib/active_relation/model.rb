@@ -105,7 +105,13 @@ module ActiveRelation
     end
 
     def has_attribute? (attribute)
-      respond_to?(attribute) || attributes.include?(attribute)
+      if attributes.include?(attribute)
+        true
+      elsif respond_to?(attribute)
+        !public_send(attribute).nil?
+      else
+        false
+      end
     end
 
     def [] (attribute)
