@@ -229,7 +229,7 @@ module ActiveRelation
         unless scope.is_a?(Proc)
           name  = scope || :default
           scope = proc do |ids, *arguments|
-            scoped(name, *arguments)
+            scoped(name, ids, *arguments)
             where(right_node, ids)
           end
         end
