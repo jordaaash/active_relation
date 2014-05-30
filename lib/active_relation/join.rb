@@ -119,11 +119,11 @@ module ActiveRelation
       node
     end
 
-    def on (fields, values = nil, comparison = :==, negate = false, &block)
+    def on (fields, values = :not_null, comparison = :==, negate = false, &block)
       nodes_for_where(fields, values, comparison, negate, &block)
     end
 
-    def compare_on (fields, comparison, values = nil, negate = false, &block)
+    def compare_on (fields, comparison, values, negate = false, &block)
       nodes_for_where(fields, values, comparison, negate, &block)
     end
   end

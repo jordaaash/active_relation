@@ -2,7 +2,7 @@ require 'active_support/core_ext/array/wrap'
 
 module ActiveRelation
   module Where
-    def where (fields = nil, values = nil, comparison = :==, &block)
+    def where (fields = nil, values = :not_null, comparison = :==, &block)
       if fields
         negate = not?
         @not   = nil
@@ -12,7 +12,7 @@ module ActiveRelation
       self
     end
 
-    def compare (fields, comparison, values = nil, &block)
+    def compare (fields, comparison, values, &block)
       where(fields, values, comparison, &block)
     end
 
@@ -20,7 +20,7 @@ module ActiveRelation
       compare(fields, :%, values, &block)
     end
 
-    def not (fields = nil, values = nil, comparison = :==, &block)
+    def not (fields = nil, values = :not_null, comparison = :==, &block)
       not!
       fields ? where(fields, values, comparison, &block) : self
     end
@@ -39,7 +39,7 @@ module ActiveRelation
       query.constraints
     end
 
-    def nodes_for_where (fields, values = nil, comparison = :==, negate = false, &block)
+    def nodes_for_where (fields, values = :not_null, comparison = :==, negate = false, &block)
       unless fields.is_a?(Hash)
         fields = if fields.is_a?(Array)
                    unless values.nil?
@@ -56,14 +56,15 @@ module ActiveRelation
       nodes.reduce(first) { |f, n| f.and(n) }
     end
 
-    def node_for_where (field, values, comparison = :==, negate = false, &block)
+    def node_for_where (field, values = :not_null, comparison = :==, negate = false, &block)
+      values, negate = nil, !negate if values == :not_null && comparison == :==
       node   = node_for_field(field)
       values = values.to_a if values.is_a?(Set) || values.is_a?(Range)
-      node   = comparison_for_node(node, values, comparison, negate)
+      node   = comparison_for_node(node, comparison, values, negate)
       yield_for_node(node, field, values, comparison, negate, &block)
     end
 
-    def comparison_for_node (node, values, comparison = :==, negate = false)
+    def comparison_for_node (node, comparison, values, negate = false)
       methods = methods_for_comparison(comparison, negate)
       method  = values.is_a?(Array) ? methods.last : methods.first
       raise ActiveRelation::ComparisonInvalid unless node.respond_to?(method)
