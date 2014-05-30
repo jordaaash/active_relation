@@ -69,7 +69,7 @@ module ActiveRelation
       if block
         raise ActiveRelation::ScopeInvalid if scope.is_a?(Proc)
       else
-        block = scope.is_a?(Proc) ? scope : self.scope(scope)
+        block = scope.is_a?(Proc) ? scope : scopes[scope]
       end
       instance_exec(*arguments, &block) if block
       scoped unless scoped? || scope == :default

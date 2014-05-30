@@ -27,11 +27,11 @@ module ActiveRelation
     end
 
     def respond_to_missing? (symbol, *)
-      (model.respond_to?(symbol) && model.scopes.include?(symbol)) || super
+      (model.respond_to?(symbol) && scopes.include?(symbol)) || super
     end
 
     def method_missing (symbol, *arguments, &block)
-      if model.respond_to?(symbol) && model.scopes.include?(symbol)
+      if model.respond_to?(symbol) && scopes.include?(symbol)
         scoped(symbol, *arguments, &block)
       else
         super
@@ -45,8 +45,8 @@ module ActiveRelation
              :[], :fields, :aliases, :attributes, :columns,
              :aliases_for_fields, :alias_for_field, :alias_valid?,
              :node_for_field, :node_valid?, :yield_for_node,
-             :cast_types, :cast_type,
-             :associations, :through_associations, :joins, :scope, :nest_association,
+             :cast_types, :cast_type, :nest_association,
+             :associations, :through_associations, :joins, :includes, :scopes,
              :quote, :sql, :star, :function, :cast, :upper, :lower, to: :model
   end
 end

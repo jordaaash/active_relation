@@ -14,7 +14,7 @@ module ActiveRelation
       delegate :columns_hash, to: :active_record
 
       delegate :all, :find, :find_by, :count, :first, :first!, :scoped, :unscoped,
-               :select, :distinct, :join,
+               :select, :distinct, :join, :including,
                :where, :compare, :like, :not,
                :order, :paginate, :offset, :limit,
                :group, :having, :to_sql, to: :relation
@@ -136,12 +136,19 @@ module ActiveRelation
       attributes[attribute] = cast_type(attribute, value)
     end
 
+    def serializable_hash
+      attributes.reduce({}) do |h, (a, v)|
+        h[a] = respond_to?(a) ? public_send(a) : v
+        h
+      end
+    end
+
     def inspect
-      attributes.inspect
+      serializable_hash.inspect
     end
 
     def as_json (options = nil)
-      attributes.as_json(options)
+      serializable_hash.as_json(options)
     end
 
     def respond_to_missing? (symbol, *)

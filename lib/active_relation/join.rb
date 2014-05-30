@@ -102,7 +102,7 @@ module ActiveRelation
       end
       relation = model.relation
       nested   = nest_association(association)
-      scope    = self.scope(nested)
+      scope    = scopes[nested]
       scope ? relation.scoped(scope) : relation.unscoped
       relation.deep_select(fields, operation, depth - 1) if depth > 0
       relation

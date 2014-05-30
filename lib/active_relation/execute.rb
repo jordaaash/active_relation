@@ -14,21 +14,24 @@ module ActiveRelation
         if results.size
           pk = primary_key
           fk = foreign_key
-          includes.each do |i, block|
-            associated         = associations[i]
-            ids                = results.map(&pk)
-            block              ||= proc { |ids| all.distinct.where(fk, ids) }
-            relation           = associated.instance_exec(ids, results, &block)
-            associated_results = relation.results.reduce({}) do |h, r|
+          included.each do |association, include|
+            unless (associated = associations[association])
+              raise ActiveRelation::IncludeInvalid
+            end
+            ids      = results.map(&pk)
+            relation = associated.relation
+            relation.instance_exec(ids, &include)
+            associated_results = relation.results
+            associated_results = associated_results.reduce({}) do |h, r|
               id = r[fk]
               a  = h[id] ||= []
               a << r
               h
             end
             results.each do |result|
-              id        = result[pk]
-              r         = associated_results[id]
-              result[i] = r || []
+              id                  = result[pk]
+              r                   = associated_results[id]
+              result[association] = r || []
             end
           end
         end
@@ -41,7 +44,7 @@ module ActiveRelation
     end
 
     def reset
-      @results = @rows = @raw = @sql = nil
+      @results = @rows = @raw = @sql = @included = nil
       @query   = @select = @distinct = @scoped = @not = nil
       self
     end

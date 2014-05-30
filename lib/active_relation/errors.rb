@@ -65,6 +65,12 @@ module ActiveRelation
   class AssociationNotDefined < DefinitionError
   end
 
+  class IncludeInvalid < ArgumentError
+  end
+
+  class IncludeDefinitionInvalid < DefinitionError
+  end
+
   class ScopeDefinitionInvalid < DefinitionError
   end
 end

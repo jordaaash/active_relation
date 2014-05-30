@@ -103,12 +103,38 @@ module ActiveRelation
         join_on association, join_left, join_right, join_model, &join
       end
 
+      unless (scope = options[:scope]) == false
+        include_association association, join_right, join_model, scope
+        # include_association_new association, join_left, join_right, join_model, scope
+      end
+
       join_model
     end
 
     def has_and_belongs_to_many (association, options = {}, &block)
       # TODO: Implement has_and_belongs_to_many relationships
       raise NotImplementedError
+    end
+
+    def scope (name = :default, scope = nil, define = true, &block)
+      raise ActiveRelation::ScopeDefinitionInvalid unless name
+      if block
+        raise ActiveRelation::ScopeDefinitionInvalid if scope
+        scope = block
+      else
+        raise ActiveRelation::ScopeDefinitionInvalid unless scope
+      end
+      if define
+        define_singleton_method(name) do |*arguments, &block|
+          relation = scoped(name, *arguments)
+          if relation.respond_to?(name)
+            relation.public_send(name, *arguments, &block)
+          else
+            relation
+          end
+        end
+      end
+      scopes[name] = scope
     end
 
     def associate (association, options = {}, &block)
@@ -125,6 +151,8 @@ module ActiveRelation
             node = node.as(nested)
           elsif node.respond_to?(:alias=)
             node.alias = nested
+          else
+            raise ActiveRelation::AssociationDefinitionInvalid
           end
           node
         end
@@ -158,7 +186,7 @@ module ActiveRelation
 
     def scope_association (association, scope = nil, &block)
       if block
-        raise ActiveRelation::ScopeInvalid if scope
+        raise ActiveRelation::ScopeDefinitionInvalid if scope
         scope = block
       else
         unless scope.is_a?(Proc)
@@ -172,28 +200,43 @@ module ActiveRelation
       self.scope nested, scope, false
     end
 
-    def scope (name = :default, scope = nil, define = true, &block)
-      raise ActiveRelation::ScopeInvalid unless name
+    def include_association (association, foreign_key = nil, model = self, scope = nil, &block)
       if block
-        raise ActiveRelation::ScopeInvalid if scope
+        raise ActiveRelation::IncludeDefinitionInvalid if scope
         scope = block
-      end
-
-      if scope
-        if define
-          define_singleton_method(name) do |*arguments, &block|
-            relation = scoped(name, *arguments)
-            if relation.respond_to?(name)
-              relation.public_send(name, *arguments, &block)
-            else
-              relation
-            end
+      else
+        unless scope.is_a?(Proc)
+          name        = scope || :default
+          foreign_key ||= self.foreign_key
+          scope     = proc do |ids, *arguments|
+            node = model[foreign_key]
+            scoped(name, *arguments)
+            where(node, ids)
           end
         end
-        scopes[name] = scope
-      else
-        scopes[name]
       end
+      includes[association] = scope
+    end
+
+    def include_association_new (association, left_field = nil, right_field = nil, model = self, scope = nil, &block)
+      if block
+        raise ActiveRelation::IncludeDefinitionInvalid if scope
+        scope = block
+      end
+      includes[association] = proc do |ids, *arguments|
+        left_node  = model[left_field]
+        associated = associations[association]
+        right_node = associated[right_field]
+        unless scope.is_a?(Proc)
+          name  = scope || :default
+          scope = proc do |ids, *arguments|
+            scoped(name, *arguments)
+            where(right_node, ids)
+          end
+        end
+        instance_exec(ids, *arguments, &scope)
+      end
+      nil # Avoid eager evaluation of the block from using the return value
     end
 
     def associations
@@ -206,6 +249,10 @@ module ActiveRelation
 
     def joins
       @joins ||= LazyIndifferentHash.new
+    end
+
+    def includes
+      @includes ||= HashWithIndifferentAccess.new
     end
 
     def scopes

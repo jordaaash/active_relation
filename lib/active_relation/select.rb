@@ -40,6 +40,14 @@ module ActiveRelation
 
     def deep_select (fields = nil, operation = nil, depth = 3, &block)
       fields  = fields_for_select(fields, operation)
+      fields  = fields.select do |f|
+        if includes.include?(f)
+          including(f) if depth == 3
+          false
+        else
+          true
+        end
+      end
       aliases = aliases_for_fields(fields, &block)
       select!
       query.project(*aliases)
