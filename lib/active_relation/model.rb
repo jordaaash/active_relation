@@ -132,9 +132,8 @@ module ActiveRelation
         end
       end
 
-      raw[attribute] = value
-      type_cast      = cast_type(attribute, value)
-      public_send(setter, type_cast)
+      raw[attribute]        = value
+      attributes[attribute] = cast_type(attribute, value)
     end
 
     def serializable_hash
