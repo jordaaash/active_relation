@@ -19,7 +19,17 @@ module ActiveRelation
         options = {}
       end
 
-      model = options[:model]
+      if (through = options[:through])
+        model = associations[through]
+        raise ActiveRelation::AssociationNotDefined unless model
+
+        associations[field] = model
+        joins[field]        = proc do
+          joins[through] or raise ActiveRelation::JoinNotDefined
+        end
+      else
+        model = options[:model]
+      end
 
       unless (as = options[:as]) == false
         self.alias field, as
