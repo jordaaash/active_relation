@@ -104,8 +104,8 @@ module ActiveRelation
       end
 
       unless (scope = options[:scope]) == false
-        include_association association, join_right, join_model, scope
-        # include_association_new association, join_left, join_right, join_model, scope
+        # include_association association, join_right, join_model, scope
+        include_association_new association, join_left, join_right, join_model, scope
       end
 
       join_model
@@ -225,8 +225,7 @@ module ActiveRelation
       end
       includes[association] = proc do |ids, *arguments|
         left_node  = model[left_field]
-        associated = associations[association]
-        right_node = associated[right_field]
+        right_node = self[right_field]
         unless scope.is_a?(Proc)
           name  = scope || :default
           scope = proc do |ids, *arguments|

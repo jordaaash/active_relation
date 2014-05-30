@@ -39,22 +39,15 @@ module ActiveRelation
     end
 
     def deep_select (fields = nil, operation = nil, depth = 3, &block)
-      fields  = fields_for_select(fields, operation)
-      fields  = fields.select do |f|
-        if includes.include?(f)
-          including(f) if depth == 3
-          false
-        else
-          true
-        end
-      end
-      aliases = aliases_for_fields(fields, &block)
+      fields           = fields_for_select(fields, operation)
+      includes, fields = fields.partition { |f| self.includes.include?(f) }
+      aliases          = aliases_for_fields(fields, &block)
       select!
       query.project(*aliases)
       if depth > 0
-        fields.each do |f|
-          deep_join(f, :outer, depth - 1) if associations.include?(f)
-        end
+        includes.each { |i| including(i) } if depth == 3
+        associations = fields.select { |f| self.associations.include?(f) }
+        associations.each { |a| deep_join(a, :outer, depth - 1) }
       end
       self
     end

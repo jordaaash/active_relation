@@ -16,7 +16,9 @@ module ActiveRelation
           unless (include = block || includes[a])
             raise ActiveRelation::IncludeInvalid
           end
-          args = arguments if args.nil?
+          args        = arguments if args.nil?
+          through     = through_associations[association]
+
           # Lambda hacks are because of this "feature":
           # http://www.ruby-doc.org/core-2.1.1/Proc.html#method-i-lambda-3F
           # https://stackoverflow.com/questions/23945533/why-do-ruby-procs-blocks-with-splat-arguments-behave-differently-than-methods-an
@@ -24,6 +26,7 @@ module ActiveRelation
           included[a] = lambda do |ids|
             ids = [ids] unless include.lambda?
             instance_exec(ids, *args, &include)
+            shallow_join_association(through, :inner) if through
           end
         end
       end
