@@ -60,7 +60,7 @@ module ActiveRelation
       default   = self.fields.keys.to_set
       available = default + associations.keys.to_set
       selected  = default.dup
-      Array.wrap(fields).reduce(selected) do |s, field|
+      Array.wrap(fields).each_with_object(selected) do |field, s|
         unless field.is_a?(Hash)
           field = field.is_a?(Array) ? Hash[*field] : Hash[field, operation]
         end
@@ -70,13 +70,12 @@ module ActiveRelation
             raise ActiveRelation::FieldNotDefined unless available.include?(f)
           end
           o = operation if o.nil? # o.nil? ? o = operation : operation = o
-          s = selected_field_for_operation(default, s, f, o)
+          select_field_for_operation(default, s, f, o)
         end
-        s
       end
     end
 
-    def selected_field_for_operation (default, selected, field, operation = nil)
+    def select_field_for_operation (default, selected, field, operation = nil)
       case operation
       when :include, :including, :also, :add, :+, true
         selected.add(field)
@@ -88,7 +87,6 @@ module ActiveRelation
       else
         raise ActiveRelation::SelectFieldOperationInvalid
       end
-      selected
     end
   end
 end

@@ -22,11 +22,10 @@ module ActiveRelation
             relation = associated.relation
             relation.instance_exec(ids, &include)
             associated_results = relation.results
-            associated_results = associated_results.reduce({}) do |h, r|
+            associated_results = associated_results.each_with_object({}) do |r, o|
               id = r[fk]
-              a  = h[id] ||= []
+              a  = o[id] ||= []
               a << r
-              h
             end
             results.each do |result|
               id                  = result[pk]

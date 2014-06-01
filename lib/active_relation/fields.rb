@@ -112,14 +112,13 @@ module ActiveRelation
     def attributes_for_fields (fields)
       default   = self.fields.keys.to_set
       available = default + associations.keys.to_set
-      fields.reduce({}) do |a, (f, v)|
+      fields.each_with_object({}) do |(f, v), o|
         f = f.to_s
         raise ActiveRelation::FieldNotDefined unless available.include?(f)
         unless (attribute = attributes[f])
           raise ActiveRelation::AttributeNotDefined
         end
-        a[attribute] = v
-        a
+        o[attribute] = v
       end
     end
 
@@ -175,19 +174,18 @@ module ActiveRelation
 
     def cast_types (results)
       results.map do |result|
-        result.reduce(new) do |m, (f, v)|
+        result.each_with_object(new) do |(f, v), o|
           if (matches = ASSOCIATION_REGEXP.match(f))
             association = matches[1]
             field       = matches[2]
-            unless (nested = m[association])
+            unless (nested = o[association])
               model  = associations[association]
-              nested = m[association] = model.new
+              nested = o[association] = model.new
             end
             nested[field] = v
           else
-            m[f] = v
+            o[f] = v
           end
-          m
         end
       end
     end

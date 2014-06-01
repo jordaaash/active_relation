@@ -137,9 +137,8 @@ module ActiveRelation
     end
 
     def serializable_hash
-      attributes.reduce({}) do |h, (a, v)|
-        h[a] = respond_to?(a) ? public_send(a) : v
-        h
+      attributes.each_with_object({}) do |(a, v), o|
+        o[a] = respond_to?(a) ? public_send(a) : v
       end
     end
 
