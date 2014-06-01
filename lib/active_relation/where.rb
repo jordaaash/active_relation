@@ -42,14 +42,14 @@ module ActiveRelation
     def nodes_for_where (fields, values = :not_null, comparison = :==, negate = false, &block)
       unless fields.is_a?(Hash)
         fields = if fields.is_a?(Array)
-                   unless values.nil?
-                     values = Array.wrap(values)
-                     fields = fields.zip(values)
-                   end
-                   Hash[fields]
-                 else
-                   Hash[fields, values]
-                 end
+          unless values.nil?
+            values = Array.wrap(values)
+            fields = fields.zip(values)
+          end
+          Hash[fields]
+        else
+          Hash[fields, values]
+        end
       end
       nodes = fields.map { |f, v| node_for_where(f, v, comparison, negate, &block) }
       first = nodes.shift
@@ -58,9 +58,9 @@ module ActiveRelation
 
     def node_for_where (field, values = :not_null, comparison = :==, negate = false, &block)
       values, negate = nil, !negate if values == :not_null && comparison == :==
-      node   = node_for_field(field)
-      values = values.to_a if values.is_a?(Set) || values.is_a?(Range)
-      node   = comparison_for_node(node, comparison, values, negate)
+      node           = node_for_field(field)
+      values         = values.to_a if values.is_a?(Set) || values.is_a?(Range)
+      node           = comparison_for_node(node, comparison, values, negate)
       yield_for_node(node, field, values, comparison, negate, &block)
     end
 

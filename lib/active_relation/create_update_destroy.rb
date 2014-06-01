@@ -2,27 +2,27 @@ module ActiveRelation
   module CreateUpdateDestroy
     def create! (fields = {})
       ids = if fields.is_a?(Array)
-              attributes = fields.map { |f| attributes_for_fields(f) }
-              active_record.transaction do
-                attributes.map do |attribute|
-                  r = active_record.new
-                  # Workaround for legacy models with mass assignment security
-                  attribute.each { |a, v| r.public_send(:"#{a}=", v) }
-                  r.save!
-                  r[primary_key]
-                end
-              end
-            else
-              attributes = attributes_for_fields(fields)
-              # Wrap in a transaction anyway since models may instantiate children
-              active_record.transaction do
-                r = active_record.new
-                # Workaround for legacy models with mass assignment security
-                attributes.each { |a, v| r.public_send(:"#{a}=", v) }
-                r.save!
-                r[primary_key]
-              end
-            end
+        attributes = fields.map { |f| attributes_for_fields(f) }
+        active_record.transaction do
+          attributes.map do |attribute|
+            r = active_record.new
+            # Workaround for legacy models with mass assignment security
+            attribute.each { |a, v| r.public_send(:"#{a}=", v) }
+            r.save!
+            r[primary_key]
+          end
+        end
+      else
+        attributes = attributes_for_fields(fields)
+        # Wrap in a transaction anyway since models may instantiate children
+        active_record.transaction do
+          r = active_record.new
+          # Workaround for legacy models with mass assignment security
+          attributes.each { |a, v| r.public_send(:"#{a}=", v) }
+          r.save!
+          r[primary_key]
+        end
+      end
       find(ids)
     end
 

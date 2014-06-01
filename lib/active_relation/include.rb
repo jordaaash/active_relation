@@ -7,10 +7,10 @@ module ActiveRelation
       Array.wrap(associations).each do |association|
         unless association.is_a?(Hash)
           association = if association.is_a?(Array)
-                          Hash[*association]
-                        else
-                          Hash[association, arguments]
-                        end
+            Hash[*association]
+          else
+            Hash[association, arguments]
+          end
         end
         association.each do |a, args|
           unless (include = block || includes[a])

@@ -15,10 +15,10 @@ module ActiveRelation
       Array.wrap(associations).each do |association|
         unless association.is_a?(Hash)
           association = if association.is_a?(Array)
-                          Hash[*association]
-                        else
-                          Hash[association, join_type]
-                        end
+            Hash[*association]
+          else
+            Hash[association, join_type]
+          end
         end
         association.each do |a, jt|
           jt = join_type if jt.nil?

@@ -40,11 +40,11 @@ module ActiveRelation
     def node_for_order (field, direction = :default, null_order = :last, &block)
       raise ActiveRelation::FieldNotDefined unless fields.include?(field)
       node = case field
-             when Arel::Attributes::Attribute, Arel::Nodes::Node
-               field
-             else
-               node_for_field(field)
-             end
+      when Arel::Attributes::Attribute, Arel::Nodes::Node
+        field
+      else
+        node_for_field(field)
+      end
       order_for_node(node, field, direction, null_order, &block)
     end
 

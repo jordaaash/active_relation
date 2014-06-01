@@ -43,12 +43,12 @@ module ActiveRelation
 
       column      ||= field
       self[field] = if block
-                      block
-                    elsif model
-                      proc { model[column] }
-                    else
-                      proc { table_alias[column] }
-                    end
+        block
+      elsif model
+        proc { model[column] }
+      else
+        proc { table_alias[column] }
+      end
       nil # Avoid eager evaluation of the block from using the return value
     end
 
@@ -150,10 +150,10 @@ module ActiveRelation
 
     def node_for_field (field, &block)
       node = if node_valid?(field)
-               field
-             else
-               self[field] or raise ActiveRelation::FieldNotDefined
-             end
+        field
+      else
+        self[field] or raise ActiveRelation::FieldNotDefined
+      end
       yield_for_node(node, field, &block)
     end
 

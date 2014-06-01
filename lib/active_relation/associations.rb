@@ -208,7 +208,7 @@ module ActiveRelation
         unless scope.is_a?(Proc)
           name        = scope || :default
           foreign_key ||= self.foreign_key
-          scope     = proc do |ids, *arguments|
+          scope       = proc do |ids, *arguments|
             node = model[foreign_key]
             scoped(name, *arguments)
             where(node, ids)

@@ -19,7 +19,7 @@ module ActiveRelation
 
     def dup
       self.class.new(model) do |r|
-        r.query  = query.dup
+        r.query = query.dup
         r.select! if select?
         r.distinct! if distinct?
         r.not! if not?
