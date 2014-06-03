@@ -59,8 +59,12 @@ module ActiveRelation
     def node_for_where (field, values = :not_null, comparison = :==, negate = false, &block)
       values, negate = nil, !negate if values == :not_null && comparison == :==
       node           = node_for_field(field)
-      values         = values.to_a if values.is_a?(Set) || values.is_a?(Range)
-      node           = comparison_for_node(node, comparison, values, negate)
+      if values.is_a?(Set) || values.is_a?(Range)
+        values = values.to_a
+      elsif values.is_a?(Symbol)
+        values = node_for_field(values)
+      end
+      node = comparison_for_node(node, comparison, values, negate)
       yield_for_node(node, field, values, comparison, negate, &block)
     end
 

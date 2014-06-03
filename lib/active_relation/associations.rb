@@ -9,8 +9,8 @@ module ActiveRelation
     def belongs_to (association, options = {}, &block)
       model = associate association, options, &block
 
-      foreign_key = options[:foreign_key] || model.foreign_key
       primary_key = options[:primary_key] || model.primary_key
+      foreign_key = options[:foreign_key] || model.foreign_key
 
       field foreign_key, column: options[:column]
 
@@ -86,6 +86,7 @@ module ActiveRelation
 
         join_model = associations[through]
         raise ActiveRelation::AssociationNotDefined unless join_model
+        # FIXME: Race condition, must be lazy evaluated in join_on block
         if model.columns[foreign_key || join_model.foreign_key]
           join_left  = primary_key || join_model.primary_key
           join_right = foreign_key || join_model.foreign_key
@@ -127,6 +128,7 @@ module ActiveRelation
       if define
         define_singleton_method(name) do |*arguments, &block|
           relation = scoped(name, *arguments)
+          # FIXME: Hack for #all causing scopes to get applied twice
           if relation.respond_to?(name)
             relation.public_send(name, *arguments, &block)
           else
@@ -146,6 +148,7 @@ module ActiveRelation
       block ||= proc do
         model.aliases_for_fields.map do |a|
           node   = a.left
+          node   = node.dup
           nested = nest_association(association, a.right)
           if node.respond_to?(:as)
             node = node.as(nested)
@@ -163,6 +166,13 @@ module ActiveRelation
 
       unless (scope = options[:scope]) == false
         scope_association(association, scope)
+      end
+
+      unless options[:define] == false
+        define_method(association) { attributes[association] }
+        define_method(:"#{association}=") do |value|
+          attributes[association] = value
+        end
       end
 
       model

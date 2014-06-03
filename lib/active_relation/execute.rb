@@ -11,7 +11,7 @@ module ActiveRelation
     def results
       @results ||= begin
         results = cast_types(rows)
-        if results.size
+        if results.size > 0 && included.size > 0
           pk = primary_key
           fk = foreign_key
           included.each do |association, include|

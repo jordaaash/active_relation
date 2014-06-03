@@ -6,12 +6,16 @@ module ActiveRelation
       self
     end
 
-    def having (fields, comparison, values = nil, &block)
+    def having (fields, values = :not_null, comparison = :==, &block)
       negate = not?
       @not   = nil
       nodes  = nodes_for_where(fields, values, comparison, negate, &block)
       query.having(nodes)
       self
+    end
+
+    def comparing (fields, comparison, values, &block)
+      having(fields, values, comparison, &block)
     end
   end
 end

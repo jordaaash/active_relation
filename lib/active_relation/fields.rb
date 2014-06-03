@@ -43,12 +43,18 @@ module ActiveRelation
 
       column      ||= field
       self[field] = if block
-        block
+        proc { model.instance_exec(&block) }
       elsif model
         proc { model[column] }
       else
         proc { table_alias[column] }
       end
+
+      unless options[:define] == false
+        define_method(field) { attributes[field] }
+        define_method(:"#{field}=") { |value| attributes[field] = value }
+      end
+
       nil # Avoid eager evaluation of the block from using the return value
     end
 
@@ -60,6 +66,7 @@ module ActiveRelation
       as             ||= field
       aliases[field] = block || proc do
         node = self[field]
+        node = node.dup
         if node.respond_to?(:as)
           node = node.as(as.to_s)
         elsif node.respond_to?(:alias=)
@@ -74,8 +81,11 @@ module ActiveRelation
 
     def column (field, column = nil, model = nil)
       column         ||= field
-      model          ||= self
-      columns[field] = proc { model.columns_hash[column.to_s] }
+      columns[field] = if model
+        proc { model.columns[column] }
+      else
+        proc { columns_hash[column.to_s] }
+      end
       nil # Avoid eager evaluation of the block from using the return value
     end
 
@@ -110,15 +120,22 @@ module ActiveRelation
     end
 
     def attributes_for_fields (fields)
-      default   = self.fields.keys.to_set
+      default   = attributes.keys.to_set
       available = default + associations.keys.to_set
       fields.each_with_object({}) do |(f, v), o|
         f = f.to_s
         raise ActiveRelation::FieldNotDefined unless available.include?(f)
-        unless (attribute = attributes[f])
+        if (attribute = attributes[f])
+          o[attribute] = v
+        elsif (associated = associations[f])
+          o[f] = if v.is_a?(Array)
+            v.map { |a| associated.new(a) }
+          else
+            associated.new(v)
+          end
+        else
           raise ActiveRelation::AttributeNotDefined
         end
-        o[attribute] = v
       end
     end
 
@@ -172,19 +189,21 @@ module ActiveRelation
       end
     end
 
-    def cast_types (results)
-      results.map do |result|
-        result.each_with_object(new) do |(f, v), o|
+    def cast_types (rows)
+      rows.map do |r|
+        r.each_with_object(new) do |(f, v), o|
           if (matches = ASSOCIATION_REGEXP.match(f))
             association = matches[1]
             field       = matches[2]
-            unless (nested = o[association])
-              model  = associations[association]
-              nested = o[association] = model.new
+            unless (associated = associations[association])
+              raise ActiveRelation::AssociationNotDefined
             end
-            nested[field] = v
+            a     = o[association] ||= associated.new
+            value = associated.cast_type(field, v)
+            a.public_send(:"#{field}=", value)
           else
-            o[f] = v
+            value = cast_type(f, v)
+            o.public_send(:"#{f}=", value)
           end
         end
       end

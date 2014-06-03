@@ -8,7 +8,7 @@ module ActiveRelation
     extend Functions
     extend CreateUpdateDestroy
 
-    delegate :cast_type, to: :class
+    delegate :cast_type, :active_record, to: :class
 
     class << self
       delegate :columns_hash, to: :active_record
@@ -96,22 +96,15 @@ module ActiveRelation
       @attributes ||= HashWithIndifferentAccess.new
     end
 
-    def raw
-      @raw ||= HashWithIndifferentAccess.new
-    end
-
     def assign_attributes (attributes)
-      attributes.each { |a, v| self[a] = v }
+      attributes.each do |a, v|
+        value = cast_type(a, v)
+        public_send(:"#{a}=", value)
+      end
     end
 
     def has_attribute? (attribute)
-      if attributes.include?(attribute)
-        true
-      elsif respond_to?(attribute)
-        !public_send(attribute).nil?
-      else
-        false
-      end
+      attributes.include?(attribute)
     end
 
     def [] (attribute)
@@ -119,20 +112,6 @@ module ActiveRelation
     end
 
     def []= (attribute, value)
-      getter = attribute
-      unless respond_to?(getter)
-        define_singleton_method(getter) { attributes[attribute] }
-      end
-
-      setter = :"#{attribute}="
-      unless respond_to?(setter)
-        define_singleton_method(setter) do |v|
-          raw[attribute]        = v
-          attributes[attribute] = cast_type(attribute, v)
-        end
-      end
-
-      raw[attribute]        = value
       attributes[attribute] = cast_type(attribute, value)
     end
 
@@ -151,7 +130,7 @@ module ActiveRelation
     end
 
     def respond_to_missing? (symbol, *)
-      attributes.include?(symbol) || !symbol.to_s.chomp!('=').nil? || super
+      attributes.include?(symbol) || symbol.to_s.chomp!('=') || super
     end
 
     def method_missing (symbol, *arguments, &block)

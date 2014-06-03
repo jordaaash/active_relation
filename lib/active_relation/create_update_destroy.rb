@@ -18,7 +18,20 @@ module ActiveRelation
         active_record.transaction do
           r = active_record.new
           # Workaround for legacy models with mass assignment security
-          attributes.each { |a, v| r.public_send(:"#{a}=", v) }
+          attributes.each do |a, v|
+            if v.is_a?(Array)
+              v.each do |model|
+                f     = model.serializable_hash
+                value = model.class.attributes_for_fields(f)
+                r.public_send(a).build(value)
+              end
+            elsif v.is_a?(ActiveRelation::Model)
+              f = v.serializable_hash
+              r.public_send(:"build_#{a}", f)
+            else
+              r.public_send(:"#{a}=", v)
+            end
+          end
           r.save!
           r[primary_key]
         end
@@ -60,6 +73,10 @@ module ActiveRelation
         raise ActiveRecord::RecordNotSaved unless after == 0
       end
       before
+    end
+
+    def assign_attributes
+
     end
   end
 end
