@@ -171,9 +171,17 @@ module ActiveRelation
 
     def join_on (association, left_field = nil, right_field = nil, model = self, &block)
       joins[association] = proc do
-        left_node  = model[left_field]
         associated = associations[association]
+        left_node  = model[left_field]
         right_node = associated[right_field]
+
+        if left_node.nil? || right_node.nil?
+          left_field  = associated.foreign_key
+          right_field = associated.primary_key
+          left_node   = model[left_field]
+          right_node  = associated[right_field]
+        end
+
         if block
           instance_exec(associated, model, left_node, right_node, &block)
         else
