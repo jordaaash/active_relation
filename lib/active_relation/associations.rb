@@ -86,27 +86,18 @@ module ActiveRelation
 
         join_model = associations[through]
         raise ActiveRelation::AssociationNotDefined unless join_model
-        # FIXME: Race condition, must be lazy evaluated in join_on block
-        if model.columns[foreign_key || join_model.foreign_key]
-          join_left  = primary_key || join_model.primary_key
-          join_right = foreign_key || join_model.foreign_key
-        else
-          join_left  = foreign_key || model.foreign_key
-          join_right = primary_key || model.primary_key
-        end
       else
         join_model = self
-        join_left  = primary_key || join_model.primary_key
-        join_right = foreign_key || join_model.foreign_key
       end
+      left_field  = primary_key || join_model.primary_key
+      right_field = foreign_key || join_model.foreign_key
 
       unless (join = options[:join]) == false
-        join_on association, join_left, join_right, join_model, &join
+        join_on association, left_field, right_field, join_model, &join
       end
 
       unless (scope = options[:scope]) == false
-        # include_association association, join_right, join_model, scope
-        include_association_new association, join_left, join_right, join_model, scope
+        include_association association, left_field, right_field, join_model, scope
       end
 
       join_model
@@ -128,7 +119,7 @@ module ActiveRelation
       if define
         define_singleton_method(name) do |*arguments, &block|
           relation = scoped(name, *arguments)
-          # FIXME: Hack for #all causing scopes to get applied twice
+          # FIXME: This hack for #all is causing scopes to get applied twice
           if relation.respond_to?(name)
             relation.public_send(name, *arguments, &block)
           else
@@ -210,25 +201,7 @@ module ActiveRelation
       self.scope nested, scope, false
     end
 
-    def include_association (association, foreign_key = nil, model = self, scope = nil, &block)
-      if block
-        raise ActiveRelation::IncludeDefinitionInvalid if scope
-        scope = block
-      else
-        unless scope.is_a?(Proc)
-          name        = scope || :default
-          foreign_key ||= self.foreign_key
-          scope       = proc do |ids, *arguments|
-            node = model[foreign_key]
-            scoped(name, *arguments)
-            where(node, ids)
-          end
-        end
-      end
-      includes[association] = scope
-    end
-
-    def include_association_new (association, left_field = nil, right_field = nil, model = self, scope = nil, &block)
+    def include_association (association, left_field = nil, right_field = nil, model = self, scope = nil, &block)
       if block
         raise ActiveRelation::IncludeDefinitionInvalid if scope
         scope = block
