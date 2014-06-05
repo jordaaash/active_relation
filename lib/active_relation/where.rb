@@ -42,7 +42,7 @@ module ActiveRelation
     def nodes_for_where (fields, values = :not_null, comparison = :==, negate = false, &block)
       unless fields.is_a?(Hash)
         fields = if fields.is_a?(Array)
-          unless values.nil? || values == :not_null
+          unless values == :not_null
             values = Array.wrap(values)
             fields = fields.zip(values)
           end

@@ -97,7 +97,7 @@ module ActiveRelation
       end
 
       unless (scope = options[:scope]) == false
-        include_association association, left_field, right_field, join_model, scope
+        include_association association, right_field, scope
       end
 
       join_model
@@ -209,14 +209,14 @@ module ActiveRelation
       self.scope nested, scope, false
     end
 
-    def include_association (association, left_field = nil, right_field = nil, model = self, scope = nil, &block)
+    def include_association (association, foreign_key = nil, scope = nil, &block)
       if block
         raise ActiveRelation::IncludeDefinitionInvalid if scope
         scope = block
       end
       includes[association] = proc do |ids, *arguments|
-        left_node  = model[left_field]
-        right_node = self[right_field]
+        right_node = self[foreign_key]
+        raise ActiveRelation::IncludeDefinitionInvalid unless right_node
         unless scope.is_a?(Proc)
           name  = scope || :default
           scope = proc do |ids, *arguments|
