@@ -12,17 +12,17 @@ module ActiveRelation
       self
     end
 
-    def compare (fields, comparison, values, &block)
-      where(fields, values, comparison, &block)
-    end
-
-    def like (fields, values, &block)
-      compare(fields, :%, values, &block)
-    end
-
     def not (fields = nil, values = :not_null, comparison = :==, &block)
       not!
       fields ? where(fields, values, comparison, &block) : self
+    end
+
+    def compare (fields, comparison, values = nil, &block)
+      where(fields, values, comparison, &block)
+    end
+
+    def like (fields, values = nil, &block)
+      compare(fields, :%, values, &block)
     end
 
     protected
@@ -42,7 +42,7 @@ module ActiveRelation
     def nodes_for_where (fields, values = :not_null, comparison = :==, negate = false, &block)
       unless fields.is_a?(Hash)
         fields = if fields.is_a?(Array)
-          unless values.nil?
+          unless values.nil? || values == :not_null
             values = Array.wrap(values)
             fields = fields.zip(values)
           end
