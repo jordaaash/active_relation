@@ -20,9 +20,9 @@ module ActiveRelation
           through     = through_associations[association]
 
           # Lambda hacks are because of this "feature":
+          # http://makandracards.com/makandra/20641-careful-when-calling-a-ruby-block-with-an-array
           # http://www.ruby-doc.org/core-2.1.1/Proc.html#method-i-lambda-3F
           # https://stackoverflow.com/questions/23945533/why-do-ruby-procs-blocks-with-splat-arguments-behave-differently-than-methods-an
-          # http://makandracards.com/makandra/20641-careful-when-calling-a-ruby-block-with-an-array
           included[a] = lambda do |ids|
             ids = [ids] unless include.lambda? || args.size > 0
             instance_exec(ids, *args, &include)

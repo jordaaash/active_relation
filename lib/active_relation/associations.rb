@@ -169,7 +169,7 @@ module ActiveRelation
       model
     end
 
-    def join_on (association, left_field = nil, right_field = nil, model = self, &block)
+    def join_on (association, left_field, right_field, model = self, &block)
       joins[association] = proc do
         associated = associations[association]
         left_node  = model[left_field]
@@ -209,7 +209,7 @@ module ActiveRelation
       self.scope nested, scope, false
     end
 
-    def include_association (association, foreign_key = nil, scope = nil, &block)
+    def include_association (association, foreign_key, scope = nil, &block)
       if block
         raise ActiveRelation::IncludeDefinitionInvalid if scope
         scope = block
@@ -224,6 +224,7 @@ module ActiveRelation
             where(right_node, ids)
           end
         end
+        ids = [ids] unless scope.lambda? || arguments.size > 0
         instance_exec(ids, *arguments, &scope)
       end
       nil # Avoid eager evaluation of the block from using the return value
