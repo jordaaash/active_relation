@@ -22,7 +22,11 @@ module ActiveRelation
     end
 
     def order?
-      !!@order || query.orders.any?
+      !!@order || orders.any?
+    end
+
+    def orders
+      query.orders
     end
 
     def nodes_for_order (fields, direction = :default, null_order = :last, &block)
