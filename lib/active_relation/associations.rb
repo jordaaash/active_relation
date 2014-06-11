@@ -12,7 +12,7 @@ module ActiveRelation
       primary_key = options[:primary_key] || model.primary_key
       foreign_key = options[:foreign_key] || model.foreign_key
 
-      field foreign_key, column: options[:column]
+      field foreign_key, options.slice(:column, :attribute, :as, :define)
 
       unless (join = options[:join]) == false
         join_on association, foreign_key, primary_key, self, &join
@@ -153,6 +153,7 @@ module ActiveRelation
       end
 
       self.alias association, &block
+      self.attribute association, options[:association]
       associations[association] = model
 
       unless (scope = options[:scope]) == false
