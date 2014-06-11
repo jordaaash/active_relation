@@ -66,6 +66,7 @@ module ActiveRelation
       as             ||= field
       aliases[field] = block || proc do
         node = self[field]
+        raise ActiveRelation::FieldNotDefined unless node
         node = node.dup
         if node.respond_to?(:as)
           node = node.as(as.to_s)
@@ -125,14 +126,23 @@ module ActiveRelation
       fields.each_with_object({}) do |(f, v), o|
         f = f.to_s
         raise ActiveRelation::FieldNotDefined unless available.include?(f)
-        if (attribute = attributes[f])
-          o[attribute] = v
-        elsif (associated = associations[f])
-          o[f] = if v.is_a?(Array)
-            v.map { |a| associated.new(a) }
-          else
+        if (associated = associations[f])
+          attribute    = attributes[f] || f
+          o[attribute] = if v.is_a?(Array)
+            v.map do |a|
+              if a.is_a?(Hash)
+                associated.new(a)
+              else
+                a
+              end
+            end
+          elsif v.is_a?(Hash)
             associated.new(v)
+          else
+            v
           end
+        elsif (attribute = attributes[f])
+          o[attribute] = v
         else
           raise ActiveRelation::AttributeNotDefined
         end
