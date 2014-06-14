@@ -120,7 +120,7 @@ module ActiveRelation
       @attributes ||= HashWithIndifferentAccess.new
     end
 
-    def attributes_for_fields (fields)
+    def attributes_for_field_values (fields)
       default   = attributes.keys.to_set
       available = default + associations.keys.to_set
       fields.each_with_object({}) do |(f, v), o|

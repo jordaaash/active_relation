@@ -2,70 +2,37 @@ module ActiveRelation
   module CreateUpdateDestroy
     def create! (fields = {}, options = {})
       ids = if fields.is_a?(Array)
-        attributes = fields.map { |f| attributes_for_fields(f) }
         active_record.transaction do
-          attributes.map do |attribute|
+          fields.map do |f|
             record = active_record.new
-            assign_attributes(record, attributes)
-            record.save!
-            record[primary_key]
+            save!(record, f)
           end
         end
       else
-        attributes = attributes_for_fields(fields)
-        # Wrap in a transaction anyway since models may instantiate children
+        record = active_record.new
         active_record.transaction do
-          record = active_record.new
-          # Workaround for legacy models with mass assignment security
-          attributes.each do |attribute, v|
-            if v.is_a?(Array)
-              v.each do |model|
-                f = model.serializable_hash
-                a = model.class.attributes_for_fields(f)
-
-                r = record.public_send(attribute).build
-                assign_attributes(r, a)
-              end
-            elsif v.is_a?(ActiveRelation::Model)
-              f = v.serializable_hash
-              a = v.class.attributes_for_fields(f)
-
-              r = record.public_send(:"build_#{attribute}")
-              assign_attributes(r, a)
-            else
-              assign_attribute(record, attribute, v)
-            end
-          end
-          record.save!
-          record[primary_key]
+          save!(record, fields)
         end
       end
       find(ids, options)
     end
 
     def update! (ids, fields = {}, options = {})
+      records = active_record.find(ids)
       if fields.is_a?(Array)
-        attributes = fields.map { |f| attributes_for_fields(f) }
+        raise ArgumentError unless ids.is_a?(Array) && ids.size == fields.size
         active_record.transaction do
-          attributes.map.with_index do |attribute, i|
-            id = ids[i]
-            r  = active_record.find(id)
-            # Workaround for legacy models with mass assignment security
-            attribute.each { |a, v| r.public_send(:"#{a}=", v) }
-            r.save!
+          records.zip(fields).map do |r, f|
+            save!(r, f)
           end
         end
       else
-        attributes = attributes_for_fields(fields)
-        # Wrap in a transaction anyway since models may instantiate children
+        raise ArgumentError if ids.is_a?(Array)
         active_record.transaction do
-          r = active_record.find(ids)
-          # Workaround for legacy models with mass assignment security
-          attributes.each { |a, v| r.public_send(:"#{a}=", v) }
-          r.save!
+          save!(records, fields)
         end
       end
-      find(ids)
+      find(ids, options)
     end
 
     def destroy! (ids)
@@ -80,6 +47,12 @@ module ActiveRelation
     end
 
     protected
+    def save! (record, fields)
+      assign_attributes_from_fields(record, fields)
+      record.save!
+      record[primary_key]
+    end
+
     def assign_attributes (record, attributes)
       # Workaround for legacy models with mass assignment security
       attributes.each do |attribute, value|
@@ -88,14 +61,35 @@ module ActiveRelation
     end
 
     def assign_attribute (record, attribute, value)
-      if value.is_a?(ActiveRelation::Model)
-        f = value.serializable_hash
-        a = value.class.attributes_for_fields(f)
-        r = record.public_send(:"build_#{attribute}")
-        assign_attributes(r, a)
+      if value.is_a?(Array)
+        value.each do |model|
+          associated = record.public_send(attribute).build
+          assign_attributes_from_model(associated, model)
+        end
+      elsif value.is_a?(Model)
+        associated = record.public_send(:"build_#{attribute}")
+        assign_attributes_from_model(associated, value)
       else
         record.public_send(:"#{attribute}=", value)
       end
+    end
+
+    def assign_attributes_from_fields (record, fields)
+      attributes = attributes_for_field_values(fields)
+      assign_attributes(record, attributes)
+    end
+
+    def assign_attributes_from_model (record, model)
+      attributes = attributes_for_model(model)
+      assign_attributes(record, attributes)
+      if record[model.class.primary_key]
+        record.instance_variable_set(:@new_record, false)
+      end
+    end
+
+    def attributes_for_model (model)
+      fields = model.serializable_hash
+      model.class.attributes_for_field_values(fields)
     end
   end
 end
