@@ -43,15 +43,19 @@ module ActiveRelation
         end
       end
 
+      def table_name (table_name = nil)
+        if table_name
+          @table_name = table_name
+        else
+          @table_name ||= singular? ? model_name : model_name.pluralize
+        end
+      end
+
       def table_alias (table_alias = nil)
         if table_alias
           @table_alias = table.alias(table_alias.to_s)
         else
-          @table_alias ||= begin
-            table_alias = model_name
-            table_alias = table_alias.pluralize unless singular?
-            table.alias(table_alias)
-          end
+          @table_alias ||= table.alias(table_name)
         end
       end
 

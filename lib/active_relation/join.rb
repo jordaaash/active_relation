@@ -5,13 +5,13 @@ require 'arel/nodes/string_join'
 
 module ActiveRelation
   module Join
-    def join (associations, join_type = :outer, &block)
-      deep_join(associations, join_type, &block)
+    def join (associations, join_type = :outer, options, &block)
+      deep_join(associations, join_type, 1, options, &block)
     end
 
     protected
 
-    def deep_join (associations, join_type = :outer, depth = 1, &block)
+    def deep_join (associations, join_type = :outer, depth = 1, options = {}, &block)
       Array.wrap(associations).each do |association|
         unless association.is_a?(Hash)
           association = if association.is_a?(Array)
@@ -22,22 +22,24 @@ module ActiveRelation
         end
         association.each do |a, jt|
           jt = join_type if jt.nil?
-          deep_join_association(a, jt, depth, &block)
+          deep_join_association(a, jt, depth, options, &block)
         end
       end
       self
     end
 
-    def deep_join_association (association, join_type = :outer, depth = 1, &block)
+    def deep_join_association (association, join_type = :outer, depth = 1, options = {}, &block)
       unless (associated = associations[association])
         raise ActiveRelation::AssociationNotDefined
       end
-      table_alias = associated.table_alias
+      table_alias = options[:as] || associated.table_alias
       aliases     = source_aliases
       unless aliases.include?(table_alias)
         distinct unless distinct?
         through = through_associations[association]
-        shallow_join_association(through, join_type) if through
+        if through
+          shallow_join_association(through, join_type, as: options[:through])
+        end
         relation = scoped_relation(association, nil, nil, depth)
         node     = node_for_join(association, relation, associated, through, &block)
         type     = type_for_join_type(join_type)
@@ -47,12 +49,12 @@ module ActiveRelation
       self
     end
 
-    def shallow_join (associations, join_type = :outer, &block)
-      deep_join(associations, join_type, 0, &block)
+    def shallow_join (associations, join_type = :outer, options = {}, &block)
+      deep_join(associations, join_type, 0, options, &block)
     end
 
-    def shallow_join_association (association, join_type = :outer, &block)
-      deep_join_association(association, join_type, 0, &block)
+    def shallow_join_association (association, join_type = :outer, options = {}, &block)
+      deep_join_association(association, join_type, 0, options, &block)
     end
 
     def type_for_join_type (join_type)
