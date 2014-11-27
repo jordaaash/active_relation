@@ -16,8 +16,10 @@ module ActiveRelation
           unless (include = block || includes[a])
             raise ActiveRelation::IncludeInvalid
           end
-          args        = arguments if args.nil?
-          through     = through_associations[association]
+          args = arguments if args.nil?
+          if through = through_associations[a]
+            shallow_join_association(through, :inner)
+          end
 
           # Lambda hacks are because of this "feature":
           # http://makandracards.com/makandra/20641-careful-when-calling-a-ruby-block-with-an-array
@@ -26,7 +28,6 @@ module ActiveRelation
           included[a] = lambda do |ids|
             ids = [ids] unless include.lambda? || args.size > 0
             instance_exec(ids, *args, &include)
-            shallow_join_association(through, :inner) if through
           end
         end
       end
