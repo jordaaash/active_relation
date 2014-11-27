@@ -5,7 +5,7 @@ require 'arel/nodes/string_join'
 
 module ActiveRelation
   module Join
-    def join (associations, join_type = :outer, options, &block)
+    def join (associations, join_type = :outer, options = {}, &block)
       deep_join(associations, join_type, 1, options, &block)
     end
 
@@ -41,7 +41,7 @@ module ActiveRelation
           shallow_join_association(through, join_type, as: options[:through])
         end
         relation = scoped_relation(association, nil, nil, depth)
-        node     = node_for_join(association, relation, associated, through, &block)
+        node     = node_for_join(association, relation, associated, through, options[:node], &block)
         type     = type_for_join_type(join_type)
         query.join(table_alias, type).on(node)
         merge_join_sources(relation, aliases)
@@ -110,8 +110,8 @@ module ActiveRelation
       relation
     end
 
-    def node_for_join (association, relation, associated, through = nil, &block)
-      node = joins[association] || EmptyNode.new
+    def node_for_join (association, relation, associated, through = nil, node = nil, &block)
+      node ||= joins[association] || EmptyNode.new
       node = merge_constraints(relation, node)
       if block
         on   = relation.instance_exec(node, association, associated, through, &block)
