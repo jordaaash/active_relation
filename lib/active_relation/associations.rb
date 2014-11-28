@@ -86,6 +86,8 @@ module ActiveRelation
 
         join_model = associations[through]
         raise ActiveRelation::AssociationNotDefined unless join_model
+        # works for has_many through has_many
+        # fails for has_many through has_one
         primary_key ||= model.foreign_key
         foreign_key ||= model.primary_key
       else
