@@ -33,6 +33,9 @@ module ActiveRelation
         raise ActiveRelation::AssociationNotDefined
       end
       table_alias = options[:as] || associated.table_alias
+      unless table_alias.is_a?(Arel::Nodes::TableAlias)
+        table_alias = associated.table.alias(table_alias)
+      end
       aliases     = source_aliases
       unless aliases.include?(table_alias)
         distinct unless distinct?
