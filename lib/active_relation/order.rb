@@ -36,20 +36,10 @@ module ActiveRelation
         end
         field.map do |f, d|
           d = direction if d.nil?
-          node_for_order(f, d, null_order, &block)
+          node = node_for_field(f)
+          order_for_node(node, f, d, null_order, &block)
         end
       end
-    end
-
-    def node_for_order (field, direction = :default, null_order = :last, &block)
-      raise ActiveRelation::FieldNotDefined unless fields.include?(field)
-      node = case field
-      when Arel::Attributes::Attribute, Arel::Nodes::Node
-        field
-      else
-        node_for_field(field)
-      end
-      order_for_node(node, field, direction, null_order, &block)
     end
 
     def order_for_node (node, field = nil, direction = :default, null_order = :last, &block)
