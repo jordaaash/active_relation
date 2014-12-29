@@ -126,9 +126,8 @@ module ActiveRelation
           # FIXME: This hack for #all is causing scopes to get applied twice
           if relation.respond_to?(name)
             relation.public_send(name, *arguments, &block)
-          else
-            relation
           end
+          relation
         end
       end
       scopes[name] = scope
