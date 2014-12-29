@@ -124,12 +124,12 @@ module ActiveRelation
       node
     end
 
-    def on (fields, values = :not_null, comparison = :==, negate = false, &block)
-      nodes_for_where(fields, values, comparison, negate, &block)
+    def on (fields, values = :not_null, comparison = :==, negate = false, condition = :and, &block)
+      nodes_for_where(fields, values, comparison, negate, condition, &block)
     end
 
-    def compare_on (fields, comparison, values, negate = false, &block)
-      nodes_for_where(fields, values, comparison, negate, &block)
+    def compare_on (fields, comparison, values, negate = false, condition = :and, &block)
+      nodes_for_where(fields, values, comparison, negate, condition, &block)
     end
   end
 end

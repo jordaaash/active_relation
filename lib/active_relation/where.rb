@@ -2,11 +2,11 @@ require 'active_support/core_ext/array/wrap'
 
 module ActiveRelation
   module Where
-    def where (fields = nil, values = :not_null, comparison = :==, &block)
+    def where (fields = nil, values = :not_null, comparison = :==, condition = :and, &block)
       if fields
         negate = not?
         @not   = nil
-        nodes  = nodes_for_where(fields, values, comparison, negate, &block)
+        nodes  = nodes_for_where(fields, values, comparison, negate, condition, &block)
         query.where(nodes)
       end
       self
@@ -39,7 +39,7 @@ module ActiveRelation
       query.constraints
     end
 
-    def nodes_for_where (fields, values = :not_null, comparison = :==, negate = false, &block)
+    def nodes_for_where (fields, values = :not_null, comparison = :==, negate = false, condition = :and, &block)
       unless fields.is_a?(Hash)
         fields = if fields.is_a?(Array)
           unless values == :not_null
@@ -53,7 +53,7 @@ module ActiveRelation
       end
       nodes = fields.map { |f, v| node_for_where(f, v, comparison, negate, &block) }
       first = nodes.shift
-      nodes.reduce(first) { |f, n| f.and(n) }
+      nodes.reduce(first) { |f, n| f.public_send(condition, n) }
     end
 
     def node_for_where (field, values = :not_null, comparison = :==, negate = false, &block)
