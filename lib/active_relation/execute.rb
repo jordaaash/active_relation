@@ -16,8 +16,9 @@ module ActiveRelation
             unless (associated = associations[association])
               raise ActiveRelation::IncludeInvalid
             end
-            pk  = primary_key
-            if through = through_associations[association] && included[through]
+            pk      = primary_key
+            through = through_associations[association]
+            if through && included[through]
               fk = associated.foreign_key
               nested_ids = results.each_with_object({}) do |r, o|
                 id = r[pk]
