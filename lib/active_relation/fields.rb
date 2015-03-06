@@ -1,4 +1,3 @@
-require 'ruby_utils/lazy_indifferent_hash'
 require 'arel/nodes/binary'
 require 'arel/attributes/attribute'
 require 'arel/nodes/node'
@@ -10,6 +9,7 @@ module ActiveRelation
 
     def field (field, options = nil, &block)
       raise ActiveRelation::FieldDefinitionInvalid unless field =~ FIELD_REGEXP
+
       if options.is_a?(Proc)
         raise ActiveRelation::FieldDefinitionInvalid if block
         block, options = options, {}
@@ -105,15 +105,15 @@ module ActiveRelation
     end
 
     def fields
-      @fields ||= LazyIndifferentHash.new
+      @fields ||= FieldHash.new(self)
     end
 
     def aliases
-      @aliases ||= LazyIndifferentHash.new
+      @aliases ||= FieldHash.new(self)
     end
 
     def columns
-      @columns ||= LazyIndifferentHash.new
+      @columns ||= FieldHash.new(self)
     end
 
     def attributes

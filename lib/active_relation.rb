@@ -21,4 +21,6 @@ module ActiveRelation
 
   autoload :EmptyNode,           'active_relation/empty_node'
   autoload :Regexp,              'active_relation/regexp'
+
+  autoload :FieldHash,           'active_relation/field_hash'
 end

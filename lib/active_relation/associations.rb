@@ -1,6 +1,5 @@
 require 'active_support/core_ext/string/inflections'
 require 'active_support/hash_with_indifferent_access'
-require 'ruby_utils/lazy_indifferent_hash'
 
 module ActiveRelation
   module Associations
@@ -243,7 +242,7 @@ module ActiveRelation
     end
 
     def joins
-      @joins ||= LazyIndifferentHash.new
+      @joins ||= FieldHash.new(self)
     end
 
     def includes

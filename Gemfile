@@ -1,7 +1,5 @@
 source 'http://rubygems.org'
 
-gem 'ruby_utils', '0.1.0', github: 'jordansexton/ruby_utils'
-
 gem 'activesupport', '~> 3.2.18'
 gem 'activerecord',  '~> 3.2.18'
 
