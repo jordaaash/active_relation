@@ -62,10 +62,11 @@ module ActiveRelation
       def alias_table (table_alias)
         table = clone
         table.table_alias(table_alias)
-        table.fields.scope  = table
-        table.aliases.scope = table
-        table.columns.scope = table
-        table.joins.scope   = table
+        %i(fields aliases columns joins).each do |field|
+          field_hash = public_send(field).clone
+          field_hash.scope = table
+          table.instance_variable_set(:"@#{field}", field_hash)
+        end
         table
       end
 
