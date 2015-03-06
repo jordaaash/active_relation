@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 
-gem 'activesupport', '~> 3.2.18'
-gem 'activerecord',  '~> 3.2.18'
+gem 'activesupport', '~> 3.2.21'
+gem 'activerecord',  '~> 3.2.21'
 
 group :development do
   gem 'shoulda',   '>= 0'
