@@ -32,9 +32,17 @@ module ActiveRelation
       unless (associated = associations[association])
         raise ActiveRelation::AssociationNotDefined
       end
-      table_alias = options[:as] || associated.table_alias
-      unless table_alias.is_a?(Arel::Nodes::TableAlias)
-        table_alias = associated.table.alias(table_alias)
+      as          = options[:as]
+      table_alias = if as
+        if as.is_a?(Arel::Nodes::TableAlias)
+          as
+        elsif as < Model
+          as.table_alias
+        else
+          associated.table.alias(as)
+        end
+      else
+        associated.table_alias
       end
       aliases     = source_aliases
       unless aliases.include?(table_alias)

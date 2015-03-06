@@ -59,6 +59,16 @@ module ActiveRelation
         end
       end
 
+      def alias_table (table_alias)
+        table = clone
+        table.table_alias(table_alias)
+        table.fields.scope  = table
+        table.aliases.scope = table
+        table.columns.scope = table
+        table.joins.scope   = table
+        table
+      end
+
       def singular (singular = true)
         @singular = singular
       end
