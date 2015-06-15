@@ -98,7 +98,7 @@ module ActiveRelation
     end
 
     def merge_constraints (relation, node)
-      relation.constraints.reduce(node) { |n, c| n.and(c) }
+      relation.constraints.reduce(node) { |n, c| c.and(n) }
     end
 
     def merge_join_sources (relation, aliases = nil)
@@ -126,7 +126,7 @@ module ActiveRelation
       node = merge_constraints(relation, node)
       if block
         on   = relation.instance_exec(node, association, associated, through, &block)
-        node = on.is_a?(Array) ? on.reduce(node) { |n, c| n.and(c) } : on
+        node = on.is_a?(Array) ? on.reduce(node) { |n, c| c.and(n) } : on
       end
       raise ActiveRelation::JoinTypeInvalid unless node_valid?(node)
       node
