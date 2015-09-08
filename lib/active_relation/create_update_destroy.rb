@@ -18,6 +18,17 @@ module ActiveRelation
     end
 
     def update! (ids, fields = {}, options = {})
+      ids = if ids.is_a?(Array)
+        results = find(ids, fields: [primary_key])
+        results.map(&primary_key)
+      else
+        result = if ids.is_a?(Hash)
+          find_by!(ids, fields: [primary_key])
+        else
+          find(ids, fields: [primary_key])
+        end
+        result[primary_key]
+      end
       records = active_record.find(ids)
       if fields.is_a?(Array)
         raise ArgumentError unless ids.is_a?(Array) && ids.size == fields.size
