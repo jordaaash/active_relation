@@ -13,7 +13,8 @@ module ActiveRelation
     class << self
       delegate :columns_hash, to: :active_record
 
-      delegate :all, :find, :find_by, :count, :first, :first!, :scoped, :unscoped,
+      delegate :all, :count, :find, :find_by, :find_by!, :first, :first!,
+               :scoped, :unscoped,
                :select, :distinct, :join, :including,
                :where, :compare, :like, :not,
                :order, :paginate, :offset, :limit,
