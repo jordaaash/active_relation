@@ -30,15 +30,21 @@ module ActiveRelation
         result[primary_key]
       end
       records = active_record.find(ids)
-      if fields.is_a?(Array)
-        raise ArgumentError unless ids.is_a?(Array) && ids.size == fields.size
-        active_record.transaction do
-          records.zip(fields).map do |r, f|
-            save!(r, f)
+      if ids.is_a?(Array)
+        if fields.is_a?(Array)
+          raise ArgumentError unless ids.size == fields.size
+          active_record.transaction do
+            records.zip(fields).map do |r, f|
+              save!(r, f)
+            end
+          end
+        else
+          records.map do |r|
+            save!(r, fields)
           end
         end
       else
-        raise ArgumentError if ids.is_a?(Array)
+        raise ArgumentError if fields.is_a?(Array)
         active_record.transaction do
           save!(records, fields)
         end
